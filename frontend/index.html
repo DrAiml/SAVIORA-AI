@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Study Tutor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🎓</span>
+        <span class="logo-text">AI Study Tutor</span>
+      </div>
+      <div id="backend-status" class="status-dot status-checking" title="Checking backend…"></div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ============================================================
+         SECTION 1 — UPLOAD
+    ============================================================ -->
+    <section class="card" id="section-upload">
+      <h2 class="card-title">📄 Upload Your Notes</h2>
+      <p class="card-subtitle">Upload a PDF and let the AI learn from it.</p>
+
+      <!-- Drop zone -->
+      <label class="drop-zone" id="drop-zone" for="file-input">
+        <span id="drop-zone-text">Click or drag a PDF here</span>
+        <input type="file" id="file-input" accept=".pdf" hidden />
+      </label>
+
+      <!-- Chosen file name -->
+      <p id="chosen-file" class="chosen-file hidden"></p>
+
+      <!-- Upload + Index buttons -->
+      <div class="button-row">
+        <button id="btn-upload" class="btn btn-primary" disabled>Upload</button>
+        <button id="btn-index"  class="btn btn-secondary" disabled>Index Document</button>
+      </div>
+
+      <!-- Status messages -->
+      <div id="upload-status" class="status-box hidden"></div>
+      <div id="index-status"  class="status-box hidden"></div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 2 — ASK YOUR NOTES
+    ============================================================ -->
+    <section class="card" id="section-ask">
+      <h2 class="card-title">💬 Ask Your Notes</h2>
+      <p class="card-subtitle">Ask any question about the uploaded document.</p>
+
+      <div class="ask-row">
+        <input
+          type="text"
+          id="question-input"
+          class="question-input"
+          placeholder="e.g. What is supervised learning?"
+          autocomplete="off"
+        />
+        <button id="btn-ask" class="btn btn-primary">Ask</button>
+      </div>
+
+      <!-- Answer area — hidden until a response arrives -->
+      <div id="answer-area" class="answer-area hidden">
+        <div class="answer-header">Answer</div>
+        <div id="answer-text" class="answer-text"></div>
+        <div id="sources-area" class="sources-area hidden">
+          <div class="sources-header">Sources</div>
+          <ul id="sources-list" class="sources-list"></ul>
+        </div>
+      </div>
+
+      <div id="ask-error" class="error-box hidden"></div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 3 — STUDY MODES
+    ============================================================ -->
+    <section class="card" id="section-modes">
+      <h2 class="card-title">📚 Study Modes</h2>
+      <p class="card-subtitle">More ways to learn from your document.</p>
+
+      <div class="modes-grid">
+
+        <div class="mode-card" id="quiz-mode-card" onclick="openQuiz()">
+          <div class="mode-icon">📝</div>
+          <div class="mode-name">Quiz</div>
+          <div class="mode-desc">Auto-generated multiple-choice questions from your notes.</div>
+          <div class="mode-badge mode-badge-ready">Start Quiz →</div>
+        </div>
+
+        <div class="mode-card" id="recall-mode-card" onclick="openRecall()">
+          <div class="mode-icon">🧠</div>
+          <div class="mode-name">Passage Recall</div>
+          <div class="mode-desc">Read a passage, then recall it from memory.</div>
+          <div class="mode-badge mode-badge-ready">Start Recall →</div>
+        </div>
+
+        <div class="mode-card" id="completion-mode-card" onclick="openCompletion()">
+          <div class="mode-icon">✏️</div>
+          <div class="mode-name">Sentence Completion</div>
+          <div class="mode-desc">Fill in the blanks from key sentences in your document.</div>
+          <div class="mode-badge mode-badge-ready">Start →</div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 4 — QUIZ (hidden until user clicks Start Quiz)
+    ============================================================ -->
+    <section class="card hidden" id="section-quiz">
+
+      <!-- Setup screen — choose number of questions -->
+      <div id="quiz-setup">
+        <h2 class="card-title">📝 Quiz</h2>
+        <p class="card-subtitle">Test yourself on your indexed document.</p>
+
+        <div class="quiz-setup-row">
+          <label for="quiz-num-questions" class="quiz-label">Number of questions:</label>
+          <select id="quiz-num-questions" class="quiz-select">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="7">7</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-generate-quiz" class="btn btn-primary">Generate Quiz</button>
+          <button class="btn btn-secondary" onclick="closeQuiz()">← Back</button>
+        </div>
+        <div id="quiz-gen-status" class="status-box hidden"></div>
+      </div>
+
+      <!-- Question screen — shown while quiz is in progress -->
+      <div id="quiz-question-screen" class="hidden">
+
+        <!-- Progress bar + counter -->
+        <div class="quiz-progress-row">
+          <span id="quiz-counter" class="quiz-counter"></span>
+          <span id="quiz-score-live" class="quiz-score-live"></span>
+        </div>
+        <div class="quiz-progress-bar-bg">
+          <div id="quiz-progress-bar" class="quiz-progress-bar"></div>
+        </div>
+
+        <!-- Question text -->
+        <div id="quiz-question-text" class="quiz-question-text"></div>
+
+        <!-- Options — rendered by JS -->
+        <div id="quiz-options" class="quiz-options"></div>
+
+        <!-- Submit / Next buttons -->
+        <div class="button-row" style="margin-top:1rem;">
+          <button id="btn-submit-answer" class="btn btn-primary" disabled>Submit Answer</button>
+          <button id="btn-next-question" class="btn btn-secondary hidden">Next →</button>
+        </div>
+
+        <!-- Per-question feedback -->
+        <div id="quiz-feedback" class="status-box hidden"></div>
+        <div id="quiz-explanation" class="quiz-explanation hidden"></div>
+      </div>
+
+      <!-- Results screen — shown after last question -->
+      <div id="quiz-results-screen" class="hidden">
+        <h2 class="card-title" style="text-align:center;">🏆 Quiz Complete!</h2>
+        <div class="quiz-final-score">
+          <div id="quiz-final-number" class="quiz-final-number"></div>
+          <div class="quiz-final-label">correct answers</div>
+        </div>
+        <div id="quiz-final-message" class="quiz-final-message"></div>
+        <div class="button-row" style="justify-content:center; margin-top:1.5rem;">
+          <button id="btn-restart-quiz" class="btn btn-primary">Restart Quiz</button>
+          <button class="btn btn-secondary" onclick="closeQuiz()">← Back to Study Modes</button>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 5 — PASSAGE RECALL (hidden until user clicks Start Recall)
+    ============================================================ -->
+    <section class="card hidden" id="section-recall">
+
+      <!-- ── Setup screen ─────────────────────────────────── -->
+      <div id="recall-setup">
+        <h2 class="card-title">🧠 Passage Recall</h2>
+        <p class="card-subtitle">Read an AI-generated passage from your notes, then recall it from memory.</p>
+
+        <div class="recall-setup-row">
+          <label for="recall-difficulty" class="quiz-label">Difficulty:</label>
+          <select id="recall-difficulty" class="quiz-select">
+            <option value="easy">Easy  (80–120 words)</option>
+            <option value="medium" selected>Medium  (120–180 words)</option>
+            <option value="hard">Hard  (180–250 words)</option>
+          </select>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-start-recall" class="btn btn-primary">Start Recall</button>
+          <button class="btn btn-secondary" onclick="closeRecall()">← Back</button>
+        </div>
+        <div id="recall-setup-status" class="status-box hidden"></div>
+      </div>
+
+      <!-- ── Reading screen ───────────────────────────────── -->
+      <div id="recall-reading" class="hidden">
+        <h2 class="card-title">🧠 Read This Passage</h2>
+        <p class="card-subtitle">You have <strong id="recall-timer-display">30</strong> seconds to read and memorise this passage.</p>
+
+        <!-- Countdown ring -->
+        <div class="recall-timer-wrap">
+          <svg class="recall-timer-svg" viewBox="0 0 80 80">
+            <circle class="recall-timer-track" cx="40" cy="40" r="34"/>
+            <circle id="recall-timer-ring" class="recall-timer-ring" cx="40" cy="40" r="34"/>
+          </svg>
+          <span id="recall-timer-number" class="recall-timer-number">30</span>
+        </div>
+
+        <!-- Passage text -->
+        <div id="recall-passage-box" class="recall-passage-box"></div>
+
+        <p class="recall-hint">The passage will be hidden when the timer ends.</p>
+      </div>
+
+      <!-- ── Recall input screen ──────────────────────────── -->
+      <div id="recall-input" class="hidden">
+        <h2 class="card-title">✍️ Write What You Remember</h2>
+        <p class="card-subtitle">Write down everything you can recall from the passage — concepts, facts, ideas.</p>
+
+        <textarea
+          id="recall-textarea"
+          class="recall-textarea"
+          placeholder="Write everything you remember from the passage here…"
+          rows="8"
+        ></textarea>
+
+        <div class="button-row">
+          <button id="btn-submit-recall" class="btn btn-primary">Submit Recall</button>
+          <button class="btn btn-secondary" onclick="closeRecall()">Cancel</button>
+        </div>
+        <div id="recall-eval-status" class="status-box hidden"></div>
+      </div>
+
+      <!-- ── Results screen ───────────────────────────────── -->
+      <div id="recall-results" class="hidden">
+        <h2 class="card-title" style="text-align:center;">🏆 Recall Results</h2>
+
+        <!-- Score gauge -->
+        <div class="recall-score-wrap">
+          <svg class="recall-score-svg" viewBox="0 0 120 120">
+            <circle class="recall-score-track" cx="60" cy="60" r="50"/>
+            <circle id="recall-score-ring" class="recall-score-ring" cx="60" cy="60" r="50"/>
+          </svg>
+          <div class="recall-score-inner">
+            <span id="recall-score-number" class="recall-score-number">—</span>
+            <span class="recall-score-pct">/ 100</span>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <p id="recall-summary" class="recall-summary"></p>
+
+        <!-- Remembered points -->
+        <div id="recall-remembered-wrap" class="recall-points-section">
+          <div class="recall-points-header recall-points-header--good">✓ Remembered</div>
+          <ul id="recall-remembered-list" class="recall-points-list"></ul>
+        </div>
+
+        <!-- Missed points -->
+        <div id="recall-missed-wrap" class="recall-points-section">
+          <div class="recall-points-header recall-points-header--missed">✗ Missed</div>
+          <ul id="recall-missed-list" class="recall-points-list"></ul>
+        </div>
+
+        <!-- Feedback -->
+        <div id="recall-feedback-box" class="recall-feedback-box hidden"></div>
+
+        <!-- Actions -->
+        <div class="button-row" style="justify-content:center; margin-top:1.5rem;">
+          <button id="btn-recall-try-again" class="btn btn-primary">Try Again</button>
+          <button class="btn btn-secondary" onclick="closeRecall()">← Back to Study Modes</button>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ============================================================
+         SECTION 6 — SENTENCE COMPLETION
+    ============================================================ -->
+    <section class="card hidden" id="section-completion">
+
+      <!-- ── Setup ──────────────────────────────────────────── -->
+      <div id="sc-setup">
+        <h2 class="card-title">✏️ Sentence Completion</h2>
+        <p class="card-subtitle">Fill in the blank with the correct concept from your notes.</p>
+
+        <div class="recall-setup-row">
+          <label for="sc-difficulty" class="quiz-label">Difficulty:</label>
+          <select id="sc-difficulty" class="quiz-select">
+            <option value="easy">Easy — strongly hinted</option>
+            <option value="medium" selected>Medium — moderate hints</option>
+            <option value="hard">Hard — nuanced concept</option>
+          </select>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-sc-start" class="btn btn-primary">Generate Question</button>
+          <button class="btn btn-secondary" onclick="closeCompletion()">← Back</button>
+        </div>
+        <div id="sc-setup-status" class="status-box hidden"></div>
+      </div>
+
+      <!-- ── Question ───────────────────────────────────────── -->
+      <div id="sc-question" class="hidden">
+
+        <!-- Session score bar -->
+        <div class="sc-session-bar">
+          <span id="sc-session-label" class="sc-session-label">Question 1</span>
+          <span id="sc-session-score" class="sc-session-score">Score: 0</span>
+        </div>
+
+        <!-- Sentence with blank -->
+        <div id="sc-sentence-box" class="sc-sentence-box"></div>
+
+        <!-- Context hint -->
+        <div id="sc-hint-box" class="sc-hint-box hidden"></div>
+
+        <!-- Answer input -->
+        <div class="sc-answer-row">
+          <input
+            type="text"
+            id="sc-answer-input"
+            class="sc-answer-input"
+            placeholder="Type the missing concept…"
+            autocomplete="off"
+          />
+          <button id="btn-sc-submit" class="btn btn-primary">Submit</button>
+        </div>
+        <div id="sc-submit-status" class="status-box hidden"></div>
+      </div>
+
+      <!-- ── Result (per question) ──────────────────────────── -->
+      <div id="sc-result" class="hidden">
+
+        <!-- Status badge -->
+        <div id="sc-status-badge" class="sc-status-badge"></div>
+
+        <!-- Score -->
+        <div class="sc-result-score-row">
+          <span class="sc-result-score-label">Score this question:</span>
+          <span id="sc-result-score" class="sc-result-score-value">—</span>
+        </div>
+
+        <!-- Expected concept -->
+        <div class="sc-result-block">
+          <div class="sc-result-block-label">Expected concept</div>
+          <div id="sc-expected-concept" class="sc-result-block-value"></div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="sc-result-block">
+          <div class="sc-result-block-label">Explanation</div>
+          <div id="sc-explanation" class="sc-result-block-value"></div>
+        </div>
+
+        <!-- Feedback -->
+        <div id="sc-feedback-box" class="sc-feedback-box hidden"></div>
+
+        <!-- Actions -->
+        <div class="button-row" style="margin-top:1.25rem;">
+          <button id="btn-sc-next" class="btn btn-primary">Next Question</button>
+          <button id="btn-sc-finish" class="btn btn-secondary">See Final Score</button>
+        </div>
+      </div>
+
+      <!-- ── Final Results ──────────────────────────────────── -->
+      <div id="sc-final" class="hidden">
+        <h2 class="card-title" style="text-align:center;">🏆 Session Complete!</h2>
+
+        <div class="sc-final-stats">
+          <div class="sc-final-stat">
+            <div id="sc-final-total"   class="sc-final-stat-value">0</div>
+            <div class="sc-final-stat-label">Attempted</div>
+          </div>
+          <div class="sc-final-stat">
+            <div id="sc-final-correct" class="sc-final-stat-value sc-correct-color">0</div>
+            <div class="sc-final-stat-label">Correct</div>
+          </div>
+          <div class="sc-final-stat">
+            <div id="sc-final-partial" class="sc-final-stat-value sc-partial-color">0</div>
+            <div class="sc-final-stat-label">Partial</div>
+          </div>
+          <div class="sc-final-stat">
+            <div id="sc-final-wrong"   class="sc-final-stat-value sc-wrong-color">0</div>
+            <div class="sc-final-stat-label">Incorrect</div>
+          </div>
+        </div>
+
+        <!-- Average score gauge (reuse recall SVG gauge style) -->
+        <div class="recall-score-wrap" style="margin-top:1rem;">
+          <svg class="recall-score-svg" viewBox="0 0 120 120">
+            <circle class="recall-score-track" cx="60" cy="60" r="50"/>
+            <circle id="sc-final-ring" class="recall-score-ring" cx="60" cy="60" r="50"/>
+          </svg>
+          <div class="recall-score-inner">
+            <span id="sc-final-avg" class="recall-score-number">—</span>
+            <span class="recall-score-pct">avg</span>
+          </div>
+        </div>
+
+        <div class="button-row" style="justify-content:center; margin-top:1.5rem;">
+          <button id="btn-sc-restart" class="btn btn-primary">Restart</button>
+          <button class="btn btn-secondary" onclick="closeCompletion()">← Back to Study Modes</button>
+        </div>
+      </div>
+
+    </section>
+
+
+    
+
+  </main>
+
+  <footer class="footer">
+    AI Study Tutor · Powered by Gemini + ChromaDB
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

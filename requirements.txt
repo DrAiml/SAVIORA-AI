@@ -1,0 +1,33 @@
+# ============================================================
+# AI Study Tutor — Backend Requirements
+# Install with:
+#   pip install -r requirements.txt
+# Use the Anaconda base environment or any Python 3.10+ env.
+# ============================================================
+
+# Web framework
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+
+# Environment variables
+python-dotenv>=0.20.0
+
+# LangChain core
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-community>=0.0.20
+langchain-text-splitters>=0.0.1
+langchain-chroma>=0.1.0
+langchain-google-genai>=1.0.0
+
+# Google Generative AI SDK
+google-genai>=1.0.0
+
+# Vector database
+chromadb>=0.4.0
+
+# PDF loader
+pypdf>=3.0.0
+
+# HTTP client (used by FastAPI for file uploads)
+python-multipart>=0.0.6
