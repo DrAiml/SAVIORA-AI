@@ -55,7 +55,8 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:5500",   # VS Code Live Server default
         "http://127.0.0.1:5500",
-        "null",                    # file:// origin — plain HTML opened from disk
+        "null", 
+        "https://saviora-ai-1.onrender.com",                   # file:// origin — plain HTML opened from disk
     ],
     allow_credentials=True,
     allow_methods=["*"],
