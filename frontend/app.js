@@ -22,7 +22,7 @@
 // Change BACKEND_URL if the FastAPI server runs on a different port.
 // ============================================================
 
-const BACKEND_URL = "http://localhost:8000";
+const BACKEND_URL = "https://saviora-ai.onrender.com";
 
 
 // ============================================================
