@@ -33,6 +33,9 @@ const BACKEND_URL = "https://saviora-ai.onrender.com";
 const state = {
   selectedFile:     null,   // File object chosen by the user
   uploadedFilename: null,   // filename returned by /upload
+  questionsAsked: 0,
+  docsIndexed: 0,
+  quizBestScore: null
   
 };
 
@@ -83,7 +86,23 @@ function hideStatus(element) {
 // HELPER — update the progress counters
 // ============================================================
 
+function updateStats() {
+  const statQuestions = document.getElementById("stat-questions");
+  const statDocs = document.getElementById("stat-docs");
+  const statQuizBest = document.getElementById("stat-quiz-best");
 
+  if (statQuestions) {
+    statQuestions.textContent = state.questionsAsked;
+  }
+
+  if (statDocs) {
+    statDocs.textContent = state.docsIndexed;
+  }
+
+  if (statQuizBest) {
+    statQuizBest.textContent = state.quizBestScore ?? "—";
+  }
+}
 
 
 // ============================================================
